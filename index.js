@@ -5,6 +5,7 @@ const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express();
 const taskHandler = require('./Routes/taskHandler.js');
+const userHandler = require('./Routes/userHandler');
 
 // ~~~~~~~~~~~~~ middlewires ~~~~~~~~~~~~~ //
 app.use(express.json());
@@ -20,6 +21,7 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD
 
 // ~~~~~~~~~~~~~~~~ Routes ~~~~~~~~~~~~~~~ //
 app.use('/task', taskHandler);
+app.use('/user', userHandler);
 
 // ====================================================== //
 // =================== Error handling =================== //
@@ -30,11 +32,10 @@ app.use((req, res, next) => {
 })
 //default error handle middlewire
 app.use((err, req, res, next) => {
-    if (err) {
-        res.status(500).send(err.message)
-    } else {
-        res.status(500).send({ message: 'Server side error' })
+    if (res.headerSent) {
+        return next(err);
     }
+    res.status(500).json({ error: err })
 })
 
 // ====================================================== //

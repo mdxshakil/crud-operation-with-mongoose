@@ -2,10 +2,11 @@ const express = require('express');
 const { default: mongoose } = require('mongoose');
 const router = express.Router();
 const taskSchema = require('../Schemas/taskSchema');
+const checkLogin = require('../middlewares/checkLogin');
 const TaskModel = new mongoose.model('Task', taskSchema);
 
 //get all the tasks
-router.get('/', async (req, res) => {
+router.get('/', checkLogin, async (req, res) => {
     const tasks = await TaskModel.find();
     res.status(200).send(tasks);
 })
@@ -52,7 +53,7 @@ router.put('/:id', (req, res) => {
     TaskModel.updateOne({ _id: id }, {
         $set: {
             name: 'Learn CSS',
-            description: 'CSS is stylesheet for html'
+            description: 'Cascading stylesheet'
         }
     }, (err) => {
         if (err) {
