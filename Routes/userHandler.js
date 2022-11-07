@@ -8,6 +8,7 @@ const UserModel = new mongoose.model('User', userSchema);
 
 //signup
 router.post('/signup', async (req, res) => {
+    console.log(req.body);
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         const newUser = new UserModel({
@@ -46,6 +47,17 @@ router.post('/login', async (req, res) => {
         }
     } catch (error) {
         res.status(401).json({ "Error": "Authentication Failed" })
+    }
+})
+
+//get all users
+router.get('/all', async (req, res) => {
+    try {
+        const users = await UserModel.find({}).populate("tasks")
+        res.status(200).json({ Message: "Users loaded successfully!", data:users })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ Message: "There was error on the server side!" })
     }
 })
 

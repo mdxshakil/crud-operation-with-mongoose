@@ -2,12 +2,19 @@ const express = require('express');
 const { default: mongoose } = require('mongoose');
 const router = express.Router();
 const taskSchema = require('../Schemas/taskSchema');
-const checkLogin = require('../middlewares/checkLogin');
 const TaskModel = new mongoose.model('Task', taskSchema);
+const userSchema = require('../Schemas/userSchema');
+const UserModel = new mongoose.model("User", userSchema);
+const checkLogin = require('../middlewares/checkLogin');
 
 //get all the tasks
 router.get('/', checkLogin, async (req, res) => {
     const tasks = await TaskModel.find();
+    res.status(200).send(tasks);
+})
+//get user's task
+router.get('/usertask', checkLogin, async (req, res) => {
+    const tasks = await TaskModel.find({}).populate("user", "name username -_id"); //here "user" is the property name of user which we set on our schema (-)means dont show this property
     res.status(200).send(tasks);
 })
 
@@ -18,9 +25,20 @@ router.get('/single/:id', async (req, res) => {
 })
 
 //post a task
-router.post('/', async (req, res) => {
+router.post('/', checkLogin, async (req, res) => {
     try {
-        const newTask = new TaskModel(req.body);
+        const newTask = new TaskModel({
+            ...req.body, //everything from req.body
+            user: req.userId // userId from jwt verification
+        });
+        await UserModel.updateOne(
+            {_id: req.userId},
+            {
+                $push: {
+                    tasks: newTask._id //schema property name
+                }
+            }
+            )
         const data = await newTask.save();
         res.status(200).json(data);
     } catch (err) {
@@ -101,9 +119,9 @@ router.get('/framework', async (req, res) => {
 // ====================================================== //
 // = get result according to our schema query method = //
 // ====================================================== //
-router.get('/description', async (req,res)=>{
+router.get('/description', async (req, res) => {
     const query = req.query.text;
     const data = await TaskModel.find().findDescription(query);
-    res.status(200).send({data});
+    res.status(200).send({ data });
 })
 module.exports = router;

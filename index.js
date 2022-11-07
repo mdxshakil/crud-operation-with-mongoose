@@ -23,6 +23,10 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD
 app.use('/task', taskHandler);
 app.use('/user', userHandler);
 
+app.get('/', (req, res) => {
+    res.send('Hello World')
+})
+
 // ====================================================== //
 // =================== Error handling =================== //
 // ====================================================== //
@@ -41,9 +45,7 @@ app.use((err, req, res, next) => {
 // ====================================================== //
 // ======================= server ======================= //
 // ====================================================== //
-app.get('/', (req, res) => {
-    res.send('Hello World')
-})
+
 app.listen(port, () => {
     console.log(`Listenig to ${port}`);
 })

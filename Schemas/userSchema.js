@@ -16,7 +16,13 @@ const userSchema = mongoose.Schema({
     status: {
         type: String,
         enum: ['active', 'inactive']
-    }
+    },
+    tasks:[
+        {
+            type: mongoose.Types.ObjectId,
+            ref: "Task" // collection name - not model name
+        }
+    ]
 })
 
 module.exports = userSchema;
